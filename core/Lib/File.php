@@ -199,47 +199,59 @@ class File {
 	}
 
 	// 获取文件 & 目录
-	public static function get($dir = '' , $is_recursive = true){
+	public static function get($dir = '' , bool $save_structure = true , bool $is_recursive = true){
 		if (!self::isDir($dir)){
 			throw new Exception("参数 1 不是目录： " . $dir);
 		}
 
 		$is_recursive = is_bool($is_recursive) ? $is_recursive : true;
-
-        $get = function($dir = '' , array &$result = []) use(&$get , $is_recursive) {
+        $get = function($dir = '' , array &$result = [] , array &$res_with_structure = []) use(&$get , $is_recursive , $save_structure) {
 			$dir = format_path($dir);
 			$dir = gbk($dir);
 			$d   = dir($dir);
-
-			if (!$d) {
+			if (empty($d)) {
 				throw new Exception("无法打开当前目录：" . $dir);
 			}
-
 			while ($fname = $d->read())
             {
-                if ($fname !== '.' && $fname !== '..'){
-                    $fname = utf8($dir) . '/' . utf8($fname);
-
-                    if (self::isDir($fname)) {
-                        $result['dir'][] = $fname . '/';
-
-                        if ($is_recursive){
-                            $get($fname , $result);
-                        }
+                if ($fname == '.' || $fname == '..'){
+                    continue ;
+                }
+                $fname = utf8($dir) . '/' . utf8($fname);
+                if ($save_structure) {
+                    if (!$is_recursive) {
+                        $res_with_structure[] = $fname;
                     } else {
-                        $result['file'][] = $fname;
+                        $res_with_structure[] = [
+                            'file'  => $fname ,
+                            'child' => []
+                        ];
+                        if (self::isDir($fname)) {
+                            $get($fname , $result , $res_with_structure[count($res_with_structure) - 1]['child']);
+
+                        }
                     }
+                    continue ;
+                }
+                if (self::isDir($fname)) {
+                    $result['dir'][] = $fname . '/';
+                    if ($is_recursive){
+                        $get($fname , $result);
+                    }
+                } else {
+                    $result['file'][] = $fname;
                 }
             }
 		};
-
 		$res = [
 			'dir'  => [] ,
 			'file' => []
 		];
-
-        $get($dir , $res);
-
+		$res_with_structure = [];
+        $get($dir , $res , $res_with_structure);
+        if ($save_structure) {
+            return $res_with_structure;
+        }
 		return $res;
 	}
 
