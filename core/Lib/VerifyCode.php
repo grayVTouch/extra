@@ -61,7 +61,7 @@ class VerifyCode {
         $font_size   = $opt['font_size'];
         $angle	     = $opt['angle'];
         $verify_code = random($len , $type);
-        $string	     = implode(' ' , $verify_code);;
+        $string	     = implode(' ' , $verify_code);
 
         // 画布
         $cav = imagecreatetruecolor($cavW , $cavH);
