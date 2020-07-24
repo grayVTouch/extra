@@ -31,13 +31,14 @@ class Watermark {
 		   'size'  => array(     // 水印尺寸
 				 'width' => 100 ,  // 宽
 				 'height' => 50    // 高
-		    ) , 
+		    ) ,
 		   'opacity' => 100      // 水印的透明度 范围：0 - 100 透明度逐渐增强
 		   'extension' => 'jpg'  // 最终生成的图片类型 gif | jpg | png
 	   );
 
 	 */
-	public function makeWatermark($img_file = '' , $watermark_file = '' , array $opt = array()){
+	public function makeWatermark($img_file = '' , $watermark_file = '' , array $opt = null)
+    {
 		if (!File::isFile($img_file)){
 			return false;
 		}
@@ -45,7 +46,7 @@ class Watermark {
 		if (!File::isFile($watermark_file)){
 			return false;
 		}
-		
+
 		$img_file_name       = get_filename($img_file);
 		$watermark_file_name = get_filename($watermark_file);
 
@@ -56,14 +57,14 @@ class Watermark {
 		if (!in_array($watermark_file_name , $this->_typeRange)) {
 			throw new \Exception('参数 2 文件类型错误');
 		}
-		
+
 		if (empty($opt)) {
 			$opt = array(
 				'pos'   => 'center' , // 水印位置
 				'size'  => array(     // 水印尺寸
 								'width' => 100 ,  // 宽
 								'height' => 50    // 高
-						   ) , 
+						   ) ,
 				'opacity' => 100 ,    // 水印的透明度 范围：0 - 100 透明度逐渐增强
 				'extension' => 'jpg'  // 最终生成的图片类型
 			);
@@ -130,12 +131,12 @@ class Watermark {
 		if ($opt['pos'] === 'top') {
 			$dst_x = abs($original_pic_info['width'] - $opt['size']['width']) / 2;
 			$dst_y = 0;
-		} 
-		
+		}
+
 		if ($opt['pos'] === 'bottom') {
 			$dst_x = abs($original_pic_info['width'] - $opt['size']['width']) / 2;
 			$dst_y = $original_pic_info['height'] - $opt['size']['height'];
-		} 
+		}
 
 		if ($opt['pos'] === 'right') {
 			$dst_x = $original_pic_info['width'] - $opt['size']['width'];
@@ -156,12 +157,12 @@ class Watermark {
 			$dst_x = $original_pic_info['width'] - $opt['size']['width'];
 			$dst_y = 0;
 		}
-		
+
 		if ($opt['pos'] === 'bottom_left') {
 			$dst_x = 0;
 			$dst_y = $original_pic_info['height'] - $opt['size']['height'];
-		} 
-		
+		}
+
 		if ($opt['pos'] === 'bottom_right') {
 			$dst_x = $original_pic_info['width'] - $opt['size']['width'];
 			$dst_y = $original_pic_info['height'] - $opt['size']['height'];
@@ -195,13 +196,10 @@ class Watermark {
 		ini_set('memory_limit' , $original_memory_limit);
 		set_time_limit($original_run_time);
 		ignore_user_abort(false);
-		
+
 		$watermark_file = utf8($watermark_file);
 
-		return array(
-			'local_path' => $watermark_file , 
-			'url'        => generate_url($watermark_file , false)
-		);
+		return $watermark_file;
 	}
 }
 

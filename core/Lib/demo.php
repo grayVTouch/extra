@@ -15,8 +15,8 @@ require_once __DIR__ . '/Image.php';
 
 $image = __DIR__ . '/test.jpg';
 
-use Core\Lib\Image;
-$i = new Image(__DIR__);
+use Core\Lib\ImageProcessor;
+$i = new ImageProcessor(__DIR__);
 $res = $i->single($image);
 
 echo "<img src='{$res}'>";
