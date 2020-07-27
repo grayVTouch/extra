@@ -104,24 +104,31 @@ class ImageProcessor {
              */
             'mode'      => 'ratio' ,
             'ratio'     => 0.5 ,
-            'width'     => 300 ,	// 处理后图片宽度
-            'height'    => 300 ,	// 处理后图片高度
+            // 处理后图片宽度
+            'width'     => 1920 ,
+            // 处理后图片高度
+            'height'    => 1080 ,
         ];
 		$mode_range = [
 		    'ratio' ,
-//            'fix' ,
+            'fix' ,
             'fix-width' ,
             'fix-height'
         ];
-		$mode   = isset($option['mode'])    ? $option['mode'] : $default['mode'];
-		$w      = isset($option['width'])   ? intval($option['width']) : $default['width'];
-		$h      = isset($option['height'])  ? intval($option['height']) : $default['height'];
-		$ratio  = isset($option['ratio'])   ? floatval($option['ratio']) : $default['ratio'];
+		$option['mode']     = isset($option['mode']) && in_array($option['mode'] , $mode_range) ? $option['mode'] : $default['mode'];
+		$option['width']    = isset($option['width']) && !empty($option['width']) ? $option['width'] : $default['width'];
+		$option['height']   = isset($option['height']) && !empty($option['height']) ? $option['height'] : $default['height'];
+		$option['ratio']    = isset($option['ratio']) && !empty($option['ratio']) ? $option['ratio'] : $default['ratio'];
+
+		$mode   = $option['mode'];
+		$w      = $option['width'];
+		$h      = $option['height'];
+		$ratio  = $option['ratio'];
+
 		if (!in_array($mode , $mode_range)) {
 		    throw new Exception('不支持的 mode');
         }
         $info = get_image_info($image);
-
 		switch ($mode)
         {
             case 'ratio':
@@ -129,10 +136,10 @@ class ImageProcessor {
                 $h = $info['height'] * $ratio;
                 break;
             case 'fix-height':
-                $h = ceil($w / $info['width'] * $info['height']);
+                $w = ceil($info['width'] / $info['height'] * $h);
                 break;
             case 'fix-width':
-                $w = ceil($info['width'] * $h / $info['height']);
+                $h = ceil($w / ($info['width'] / $info['height']));
                 break;
         }
 		// 提高脚本性能
@@ -165,6 +172,7 @@ class ImageProcessor {
                 $save = imagegif($cav , $file);
                 break;
             case 'jpg':
+            case 'jpeg':
                 $save = imagejpeg($cav , $file);
                 break;
             case 'png':
