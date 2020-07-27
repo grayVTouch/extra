@@ -11,8 +11,9 @@
 namespace Core\Lib;
 
 use Exception;
+use core\Contract\Facade as FacadeContract;
 
-class Facade implements FacadeInterface
+class Facade implements FacadeContract
 {
     // 实例集合
     private static $instance = [];
@@ -24,13 +25,13 @@ class Facade implements FacadeInterface
     }
 
     // 检查 key 是否存在
-    public static function u_exist(string $key)
+    public static function exist(string $key)
     {
         return isset(self::$instance[$key]);
     }
 
     // 获取实例
-    public static function u_make(string $key)
+    public static function make(string $key)
     {
         return self::$instance[$key] ?? null;
     }
@@ -44,10 +45,10 @@ class Facade implements FacadeInterface
     public static function __callStatic($name , array $args)
     {
         $key = static::getFacadeAccessor();
-        if (!self::u_exist($key)) {
+        if (!self::exist($key)) {
             throw new Exception("注册表中未找到 {$key} 对应的实例");
         }
-        $ins = self::u_make($key);
+        $ins = self::make($key);
         return call_user_func_array([$ins , $name] , $args);
     }
 }

@@ -6,9 +6,12 @@
  * Time: 16:06
  */
 
-namespace Lib;
+namespace Core\Wrapper;
+
+use SphinxClient;
 
 class Sphinx {
+
     protected static $_instance = null;
     protected static $_connect = null;
 
@@ -22,7 +25,7 @@ class Sphinx {
             throw new \Exception('已经存在一个 Sphinx 实例，不允许再重复实例化');
         }
 
-        self::$_connect = new \SphinxClient();
+        self::$_connect = new SphinxClient();
         self::$_connect->setServer($host , $port);
         // 如果采用了中文分词技术的时候，应该设置为 SPH_MATCH_ANY
         // 否则应该设置 SPH_MATCH_ALL

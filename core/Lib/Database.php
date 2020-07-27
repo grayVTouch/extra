@@ -6,32 +6,34 @@
 
 namespace Core\Lib;
 
+use PDO;
+
 class Database {
 	// 保存的 Db 实例
     protected $_instance       = null;
 	// 数据库连接实例
 	protected $_connect		= null;
 	// 结果集格式化类型
-    protected  $_fetchType		= \PDO::FETCH_ASSOC;
-    
+    protected  $_fetchType		= PDO::FETCH_ASSOC;
+
 	function __construct($db_type = 'mysql' , $host = '127.0.0.1' , $db_name = '' , $username = '' , $password = '' , $is_persistent = false , $charset  =  'utf8'){
 		$db_type	 	 = isset($db_type)		   ? $db_type       : 'mysql';
 		$host			 = isset($host)		       ? $host		    : '127.0.0.1';
 		$is_persistent   = is_bool($is_persistent) ? $is_persistent : false;
         $charset		 = isset($charset)		   ? $charset	    : 'utf8';
 
-        $this->_connect = new \PDO($db_type . ":host=" . $host . ";dbname=" . $db_name , $username , $password , [
-            \PDO::ATTR_PERSISTENT => $is_persistent ,
+        $this->_connect = new PDO($db_type . ":host=" . $host . ";dbname=" . $db_name , $username , $password , [
+            PDO::ATTR_PERSISTENT => $is_persistent ,
 
             // PDO 驱动比较特殊：即使在数据库配置文件中，已经设置了 utf8 字符集。
             // 其实际表现也会是 gbk 字符集
             // 因而需要在运行时指定 utf8 字符集
-            \PDO::MYSQL_ATTR_INIT_COMMAND => 'set names ' . $charset
+            PDO::MYSQL_ATTR_INIT_COMMAND => 'set names ' . $charset
         ]);
 
         // 设置错误时抛出异常
-        if ($this->_connect->getAttribute(\PDO::ATTR_ERRMODE) !== \PDO::ERRMODE_EXCEPTION) {
-            $this->_connect->setAttribute(\PDO::ATTR_ERRMODE , \PDO::ERRMODE_EXCEPTION);
+        if ($this->_connect->getAttribute(PDO::ATTR_ERRMODE) !== PDO::ERRMODE_EXCEPTION) {
+            $this->_connect->setAttribute(PDO::ATTR_ERRMODE , PDO::ERRMODE_EXCEPTION);
         }
 	}
 
@@ -49,7 +51,7 @@ class Database {
 		if (!is_null($name) && !is_string($name)) {
 			throw new \Exception('参数 1 类型错误');
 		}
-		
+
 		return $this->_connect->lastInsertId($name);
 	}
 
@@ -112,7 +114,7 @@ class Database {
     }
 
 	// 格式化 PDO 返回的查询结果集
-	public  function formatQRel(\PDOStatement $PDOStatement){
+	public  function formatQRel(PDOStatement $PDOStatement){
 		return $PDOStatement->fetchAll($this->_fetchType);
 	}
 
@@ -121,23 +123,23 @@ class Database {
      */
     public function type($v){
         if (is_string($v)) {
-            return \PDO::PARAM_STR;
+            return PDO::PARAM_STR;
         }
 
         if (is_int($v) || is_float($v)) {
-            return \PDO::PARAM_INT;
+            return PDO::PARAM_INT;
         }
 
         if (is_null($v)) {
-            return \PDO::PARAM_NULL;
+            return PDO::PARAM_NULL;
         }
 
         if (is_bool($v)) {
-            return \PDO::PARAM_BOOL;
+            return PDO::PARAM_BOOL;
         }
 
         if (is_resource($v)) {
-            return \PDO::PARAM_LOB;
+            return PDO::PARAM_LOB;
         }
 
         throw new \Exception("MySQL 不支持的数据类型");
@@ -150,12 +152,12 @@ class Database {
 	 * 第二种情况：$sql 是数组，则须符合下面这种：
 		$sql = array(
 			// 原生语句
-			'select * from person' => [] ,	
+			'select * from person' => [] ,
 			// SQL 预处理语句第一种方式
 			'select * from person where name = :nameValue and sex = :sexValue' => array(
-				'nameValue' => 'chenxuelong' , 
+				'nameValue' => 'chenxuelong' ,
 				'sexValue'  => 'male'
-			) , 
+			) ,
 			// SQL 预处理语句第二种方式
 			'select * from person where name = ? and sex = ?' => array('chenxuelong' , 'male')
 		);
@@ -180,7 +182,7 @@ class Database {
 				// 直接执行 sql 语句
 				return $this->_connect->query($sql);
 			}
-			
+
 			$stmt = $this->_connect->prepare($sql);
 
 			foreach ($params as $k => $v)
@@ -194,7 +196,7 @@ class Database {
 				throw new \Exception("执行SQL语句失败：" . $sql . "\r\nSQLState 码：" . $err_msg[0] . "\r\n驱动错误代码：" . $err_msg[1] . "\r\n错误字符串：" . $err_msg[2]);
 			}
 
-			return $stmt;	
+			return $stmt;
 		}
 
 		// 包含正确格式的数据
@@ -205,11 +207,11 @@ class Database {
             $sqls = $sql;
 		} else {
             $sqls[] = [
-				'sql'	 => $sql , 
+				'sql'	 => $sql ,
 				'params' => $params
 			];
 		}
-		
+
 		// 数组时
 		$this->_execByTransaction($sqls);
 	}
@@ -222,7 +224,7 @@ class Database {
 	 * @param  String $sql      待执行的 SQL 语句
 	 * @param  Array  $params   如果是预处理 SQL 语句，则需提供参数
 	 * @return Mixed
-	 */ 
+	 */
 	public  function get($sql = '' , array $params = []){
 		if (!is_string($sql)) {
 			throw new \Exception('参数 1 类型错误');
@@ -230,7 +232,7 @@ class Database {
 
 		$PDOStatement   = $this->query($sql , $params);
         $res            = $this->formatQRel($PDOStatement);
-		
+
 		// 无数据时
 		if (empty($res)) {
 			return false;
@@ -260,7 +262,7 @@ class Database {
 	 *原生执行获取所有记录
 	 * @param  String $sql      待执行的 SQL 语句
 	 * @param  Array  $params   如果是预处理 SQL 语句，则需提供参数
-	 * @return Array 
+	 * @return Array
 	*/
 	public  function getAll($sql = '' , array $params = []){
 		if (!is_string($sql)) {

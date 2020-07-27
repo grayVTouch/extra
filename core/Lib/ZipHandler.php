@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * 要求开启 php zip|zlib 两个扩展
+ */
 
 namespace Core\Lib;
 
@@ -42,11 +45,10 @@ class ZipHandler
                 }
             };
             $handle($path);
-            $zip->close();
-            return ;
+        } else {
+            // 文件
+            $zip->addFile($path);
         }
-        // 文件
-        $zip->addFile($path);
         $zip->close();
     }
 
@@ -74,8 +76,6 @@ class ZipHandler
                 return 'Seek error.';
             default:
                 return 'unknow error code: ' . $code;
-
-
         }
     }
 
