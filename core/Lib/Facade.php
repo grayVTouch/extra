@@ -12,7 +12,7 @@ namespace Core\Lib;
 
 use Exception;
 
-class Facade implements FacadeInterface
+class Facade implements Facade
 {
     // 实例集合
     private static $instance = [];
