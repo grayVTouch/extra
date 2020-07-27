@@ -6,9 +6,9 @@
  * Time: 10:43
  */
 
-namespace Core\Lib;
+namespace Core\Contract;
 
-interface FacadeInterface
+interface Facade
 {
     static function getFacadeAccessor() :string;
 }
