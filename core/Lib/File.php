@@ -33,11 +33,11 @@ class File {
 
 		return self::$_instance;
 	}
-	
+
 	/*
 	 * 获取文件绝对路径
 	 * @param  String $path 文件路径（相对 | 绝对路径）
-	 * @return String 
+	 * @return String
 	 */
 	public static function getRelPath($path = ''){
 		$path = format_path($path);
@@ -82,7 +82,7 @@ class File {
 
 		if (!file_exists($path)) {
 			return false;
-		} 
+		}
 
 		if (is_dir($path)) {
 			return false;
@@ -160,7 +160,7 @@ class File {
 
 			fclose($f);
 		}
-	  
+
 		return true;
 	}
 
@@ -171,7 +171,7 @@ class File {
 	 * @param   $write_type  $write_type 写入类型
 	 */
 	public static function write($file = '' , $content = '' , $type = null){
-		if (!self::isFile($file)) { 
+		if (!self::isFile($file)) {
 			self::cFile($file);
 		}
 
@@ -316,6 +316,11 @@ class File {
 	final public function __clone(){
 		throw new Exception('不允许克隆');
 	}
+
+	public static function move(string $file , string $target)
+    {
+        return rename($file , $target);
+    }
 
 }
 

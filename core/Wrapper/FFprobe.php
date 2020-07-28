@@ -34,6 +34,18 @@ class FFprobe
         $this->info = $info;
     }
 
+    /**
+     * * 不创建实例便捷调用
+     *
+     * @param string $file
+     * @return FFprobe
+     * @throws Exception
+     */
+    public static function create(string $file): FFprobe
+    {
+        return new self($file);
+    }
+
     // 获取视频信息
     public function info(): array
     {
