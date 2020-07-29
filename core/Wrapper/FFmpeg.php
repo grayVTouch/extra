@@ -78,7 +78,7 @@ class FFmpeg
      */
     public function size(int $width = 0 , int $height = 0): FFmpeg
     {
-        $size_command = '';
+        $size_command = '-s ';
         $size_command .= empty($width) ? '' : $width . 'x';
         $size_command .= empty($height) ? '' : $height;
         $size_command = ltrim($size_command , 'x');
@@ -251,7 +251,7 @@ class FFmpeg
         return $this;
     }
 
-    public function save(string $file): FFmpeg
+    public function save(string $file): void
     {
         $this->output = $file;
         $this->run();
@@ -270,7 +270,7 @@ class FFmpeg
     }
 
     // 重新运行
-    public function run()
+    public function run(): void
     {
         if (empty($this->input)) {
             throw new Exception('请提供输入文件');
@@ -310,7 +310,7 @@ class FFmpeg
         if (!empty($this->codecCommand)) {
             $command .= $this->codecCommand . ' ';
         }
-        $command .= $this->dir . '/' . $this->output;
+        $command .= $this->output;
 
         exec($command , $res , $status);
         if ($status > 0) {

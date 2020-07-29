@@ -322,6 +322,17 @@ class File {
         return rename($file , $target);
     }
 
+    public static function delete(string $path)
+    {
+        if (self::isFile($path)) {
+            File::dFile($path);
+            return ;
+        }
+        $res = self::get($path , false , true);
+        self::dFiles($res['file']);
+        self::dDirs($res['dir']);
+    }
+
 }
 
 

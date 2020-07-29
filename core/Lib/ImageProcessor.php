@@ -365,7 +365,7 @@ class ImageProcessor {
                 // 高
                 'height' => 100
             ] ,
-            // 水印的透明度 范围：0 - 100 透明度逐渐增强
+            // 水印的透明度 范围：0 - 100 透明度逐渐增强 0-透明 100-完全不透明
             'opacity' => 100 ,
         ];
         if (empty($option)) {
@@ -630,4 +630,5 @@ class ImageProcessor {
         }
         return $res;
     }
+
 }
