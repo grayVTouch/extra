@@ -10,6 +10,7 @@ namespace core;
 
 use DateTime;
 use DateTimeZone;
+use Exception;
 
 function current_time(DateTimeZone $time_zone = null): string
 {
@@ -68,7 +69,7 @@ function time_convert($duration , $type){
     $type_range = ['year' , 'month' , 'day' , 'hour' , 'minute' , 'second'];
 
     if (!in_array($type , $type_range)) {
-        throw new \Exception('参数 2 错误');
+        throw new Exception('参数 2 错误');
     }
 
     $second = 1;
@@ -98,7 +99,7 @@ function time_convert($duration , $type){
  */
 function diff_date($type , $time , $diff = 0){
     if (!check_time($time , $type)) {
-        throw new \Exception("参数 1 错误");
+        throw new Exception("参数 1 错误");
     }
 
     $timestamp  = unix_timestamp($time);
@@ -237,7 +238,7 @@ function get_month_days($year = 0 , $month = 0){
 function get_time_diff($timestamp){
     if (!isset($timestamp)) {
         return false;
-        // throw new \Exception('参数 1 未提供');
+        // throw new Exception('参数 1 未提供');
     }
 
     if (!is_valid($timestamp)) {
@@ -246,13 +247,13 @@ function get_time_diff($timestamp){
 
     /*
     if (!isset($type)) {
-        throw new \Exception('参数 2 未提供');
+        throw new Exception('参数 2 未提供');
     }
 
     $type_range = ['date' , 'datetime' , 'timestamp'];
 
     if (!in_array($type , $type_range)) {
-        throw new \Exception('参数 2 提供了一个不支持的类型！');
+        throw new Exception('参数 2 提供了一个不支持的类型！');
     }
     */
 
@@ -313,7 +314,7 @@ function get_time_diff($timestamp){
             return floor($distance / $year) . ' 年前';
         }
 
-        throw new \Exception('> 0 不在可控范围内的数值！');
+        throw new Exception('> 0 不在可控范围内的数值！');
     }
 
     if ($distance < 0) {
@@ -353,7 +354,7 @@ function get_time_diff($timestamp){
             return floor($distance / $year) . ' 年后';
         }
 
-        throw new \Exception('< 0 不在可控范围内的数值！');
+        throw new Exception('< 0 不在可控范围内的数值！');
     }
 
     return '刚刚';
@@ -585,7 +586,7 @@ function get_quarter($month){
         }
     }
 
-    throw new \Exception("不支持的月份");
+    throw new Exception("不支持的月份");
 }
 
 // 获取指定季度包含的月份
@@ -604,7 +605,7 @@ function get_month_for_quarter($quarterly = 1){
         }
     }
 
-    throw new \Exception("不支持的季度");
+    throw new Exception("不支持的季度");
 }
 
 /**

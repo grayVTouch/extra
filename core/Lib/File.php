@@ -39,7 +39,7 @@ class File {
 	 * @param  String $path 文件路径（相对 | 绝对路径）
 	 * @return String
 	 */
-	public static function getRelPath($path = ''){
+	public static function getRealPath($path = ''){
 		$path = format_path($path);
 		$path = gbk($path);
 		$path = realpath($path);
@@ -117,11 +117,11 @@ class File {
 	 * @param Integer  $privilege    目录权限
 	 * @return true | false
 	 */
-	public static function cDir($dir = '' , $privilege = 0755){
+	public static function cDir($dir = '' , $privilege = 0755 , $recursive = false){
 		if (!self::isDir($dir)) {
 			$dir = format_path($dir);
 			$dir = gbk($dir);
-			$mk  = mkdir($dir , $privilege);
+			$mk  = mkdir($dir , $privilege , $recursive);
 
 			if (!$mk) {
 				$err_msg  = "创建目录失败\n";
@@ -199,7 +199,7 @@ class File {
 	}
 
 	// 获取文件 & 目录
-	public static function get($dir = '' , bool $save_structure = true , bool $is_recursive = true){
+	public static function get($dir = '' , bool $is_recursive = true , bool $save_structure = true){
 		if (!self::isDir($dir)){
 			throw new Exception("参数 1 不是目录： " . $dir);
 		}
@@ -258,16 +258,17 @@ class File {
 	// 获取文件
 	public static function getFiles($dir = '' , $is_recursive = true){
 		$is_recursive = is_bool($is_recursive) ? $is_recursive : true;
-		$res = self::get($dir , $is_recursive);
+		$res = self::get($dir , $is_recursive , false);
 		return $res['file'];
 	}
 
 	// 获取目录
 	public static function getDirs($dir , $is_recursive = true){
         $is_recursive = is_bool($is_recursive) ? $is_recursive : true;
-        $res = self::get($dir, $is_recursive);
+        $res = self::get($dir, $is_recursive , false);
         return $res['dir'];
     }
+
 
 	// 删除单个文件
 	public static function dFile($file = ''){
@@ -322,6 +323,34 @@ class File {
         return rename($file , $target);
     }
 
+    // 删除文件 或 目录
+    public static function delete(string $path)
+    {
+        if (self::isFile($path)) {
+            File::dFile($path);
+            return ;
+        }
+        $res = self::get($path , true , false);
+        self::dFiles($res['file']);
+        self::dDirs($res['dir']);
+    }
+
+    // 创建目录
+    public static function mkdir($dir , int $mode = 0777 , $recursive = false)
+    {
+        return self::cDir($dir , $mode , $recursive);
+    }
+
+    // 移动上传文件
+    public static function moveUploadedFile(string $source , string $target): bool
+    {
+        return move_uploaded_file($source , $target);
+    }
+
+    public static function exists(string $path): bool
+    {
+        return file_exists($path);
+    }
 }
 
 

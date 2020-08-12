@@ -295,3 +295,36 @@ function decimal_random($total , $num , $scale = 2)
     }
     return $res;
 }
+
+
+/*
+ * 格式化容量
+ *
+ * @param  int      $size 单位: byte
+ * @return string
+ */
+function format_capacity(int $size , int $scale = 2): string
+{
+    $kb = 1024;
+    $mb = $kb * 1024;
+    $gb = $mb * 1024;
+    $tb = $gb * 1024;
+    $pb = $tb * 1024;
+
+    if ($size < $kb) {
+        return $size . 'B';
+    }
+    if ($size < $mb) {
+        return bcdiv($size , $kb , $scale) . 'KB';
+    }
+    if ($size < $gb) {
+        return bcdiv($size , $mb , $scale) . 'MB';
+    }
+    if ($size < $tb) {
+        return bcdiv($size , $gb , $scale) . 'GB';
+    }
+    if ($size < $pb) {
+        return bcdiv($size , $tb , $scale) . 'TB';
+    }
+    return bcdiv($size , $pb , $scale) . 'PB';
+}

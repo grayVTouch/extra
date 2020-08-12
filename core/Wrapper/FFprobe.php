@@ -21,7 +21,7 @@ class FFprobe
     public function __construct(string $file)
     {
         if (!File::isFile($file)) {
-            throw new Exception('请提供有效文件');
+            throw new Exception('请提供有效文件：' . $file);
         }
         $this->file = $file;
         $command = 'ffprobe -v quiet -show_format -show_streams -print_format json ' . $this->file;
@@ -96,7 +96,7 @@ class FFprobe
     public function displayAspectRatio(): string
     {
         $video_stream = $this->getVideoStream($this->info['streams']);
-        return $video_stream['display_aspect_ratio'];
+        return $video_stream['display_aspect_ratio'] ?? '';
     }
 
     // 视频的核心信息
