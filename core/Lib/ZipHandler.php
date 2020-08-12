@@ -33,7 +33,7 @@ class ZipHandler
             $handle = function($dir) use(&$handle , $path , $zip , &$count) {
                 $dir_name = str_replace($path , '' , $dir);
                 $zip->addEmptyDir($dir_name);
-                $file_and_dir = File::get($dir , true , false);
+                $file_and_dir = File::get($dir , false , true);
                 foreach ($file_and_dir as $v)
                 {
                     if (is_dir($v)) {

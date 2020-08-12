@@ -307,9 +307,16 @@ class FFmpeg
         if (!empty($this->sizeCommand)) {
             $command .= $this->sizeCommand . ' ';
         }
+        if (!empty($this->anCommand)) {
+            $command .= $this->anCommand . ' ';
+        }
+        if (!empty($this->vnCommand)) {
+            $command .= $this->vnCommand . ' ';
+        }
         if (!empty($this->codecCommand)) {
             $command .= $this->codecCommand . ' ';
         }
+
         $command .= $this->output;
 
         exec($command , $res , $status);

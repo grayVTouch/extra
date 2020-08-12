@@ -5,7 +5,7 @@ namespace core;
 /*
  * 简单的随机数生成函数
  * 按要求返回随机数
- * @param  Integer    $len        随机码长度                  
+ * @param  Integer    $len        随机码长度
  * @param  String     $type       随机码类型  letter | number | mixed
  * @return Array
  */
@@ -34,11 +34,11 @@ function random(int $len = 4 , string $type = 'mixed' , bool $is_return_str = tr
 				$rand = mt_rand(0 , count($letter) - 1);
 
 				shuffle($letter);
-				
+
 				$result[] = $letter[$rand];
 			}
 	}
-	
+
 	if ($type === 'number') {
 		for ($i = 0; $i < $len; ++$i)
 			{
@@ -61,7 +61,7 @@ function random(int $len = 4 , string $type = 'mixed' , bool $is_return_str = tr
 
 				shuffle($mixed);
 
-				$result[] = $mixed[$rand];		 
+				$result[] = $mixed[$rand];
 			}
 	}
 
@@ -78,22 +78,22 @@ function is_valid($val){
 	if (!isset($val)) {
 		return false;
 	}
-	
+
 	// null
 	if (is_null($val)) {
 		return false;
 	}
-	
+
 	// boolean false
 	if ($val === false) {
 		return false;
 	}
-	
+
 	// 空值
 	if ($val === '') {
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -117,7 +117,7 @@ function filter_arr(Array $arr = [] , $is_recursive = false){
 		}
 
 		if (!$is_recursive) {
-			foreach ($arr as $k => $v) 
+			foreach ($arr as $k => $v)
 				{
 					if (is_valid($v)) {
 						$rel[$k] = $v;
@@ -129,7 +129,7 @@ function filter_arr(Array $arr = [] , $is_recursive = false){
 					if (is_array($v) && empty($v)) {
 						continue;
 					}
-					
+
 					if (is_array($v) && !empty($v)) {
 						$rel[$k] = [];
 						$filter($v , $rel[$k]);
@@ -141,7 +141,7 @@ function filter_arr(Array $arr = [] , $is_recursive = false){
 				}
 		}
 	};
-   
+
 	$rel = [];
 
 	$filter($arr , $rel);
@@ -174,7 +174,7 @@ function extract_global(Array $var_list = []){
 		return true;
 	}
 
-	foreach ($var_list as $k => $v) 
+	foreach ($var_list as $k => $v)
     {
         if (isset($GLOBALS[$k])) {
             throw new Exception('已存在全局变量： ' . $k);
@@ -205,7 +205,7 @@ function func_bind_args(Callable $func = null){
 function get_platform(){
 	$user_agent   = $_SERVER['HTTP_USER_AGENT'];
 	$platform_reg = "/mobile/i";
-	
+
 	if (preg_match($platform_reg , $user_agent , $result) === 1) {
 		return 'Mobile';
 	}
@@ -294,4 +294,37 @@ function decimal_random($total , $num , $scale = 2)
         }
     }
     return $res;
+}
+
+
+/*
+ * 格式化容量
+ *
+ * @param  int      $size 单位: byte
+ * @return string
+ */
+function format_capacity(int $size , int $scale = 2): string
+{
+    $kb = 1024;
+    $mb = $kb * 1024;
+    $gb = $mb * 1024;
+    $tb = $gb * 1024;
+    $pb = $tb * 1024;
+
+    if ($size < $kb) {
+        return $size . 'B';
+    }
+    if ($size < $mb) {
+        return bcdiv($size , $kb , $scale) . 'KB';
+    }
+    if ($size < $gb) {
+        return bcdiv($size , $mb , $scale) . 'MB';
+    }
+    if ($size < $tb) {
+        return bcdiv($size , $gb , $scale) . 'GB';
+    }
+    if ($size < $pb) {
+        return bcdiv($size , $tb , $scale) . 'TB';
+    }
+    return bcdiv($size , $pb , $scale) . 'PB';
 }

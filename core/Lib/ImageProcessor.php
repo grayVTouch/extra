@@ -87,6 +87,14 @@ class ImageProcessor {
         ini_set('max_excution_time' , $this->oMaxExcutionTime);
     }
 
+    public static function transparent($cav)
+    {
+        // 设置透明
+        $transparent_cav = imagecolorallocatealpha($cav,255,255 , 255 , 127);
+        imagecolortransparent($cav , $transparent_cav);
+        imagefill($cav,0,0 , $transparent_cav);
+    }
+
     // 图片压缩
 	public function compress(string $image = '' , array $option = null , bool $base64 = true): string
     {
@@ -162,6 +170,8 @@ class ImageProcessor {
         }
 
         $cav = imagecreatetruecolor($w , $h);
+		$this->transparent($cav);
+
         // 平滑缩小到指定大小
         imagecopyresampled($cav , $img , 0 , 0 , 0 , 0 , $w , $h , $info['width'] , $info['height']);
         $filename = date('YmdHis') . random(6 , 'letter' , true) . '.' . $info['extension'];
@@ -270,8 +280,10 @@ class ImageProcessor {
                 $cav = imagecreatefrompng($img);
                 break;
         }
+        $this->transparent($cav);
         // 图像裁切
         $cut_img = imagecreatetruecolor($option['w'] , $option['h']);
+        $this->transparent($cut_img);
         imagecopy($cut_img , $cav , 0 , 0 , $option['x'] , $option['y'] , $option['w'] , $option['h']);
         $filename  = date('YmdHis') . random(6 , 'letter' , true) . '.' . $info['extension'];
         $file = $this->dir . '/' . $filename;
@@ -406,25 +418,17 @@ class ImageProcessor {
                 $image_cav = imagecreatefrompng($image);
                 break;
         }
+        $this->transparent($image_cav);
 
         $watermark_cav  = imagecreatetruecolor($option['size']['width'] , $option['size']['height']);
+
         /**
          * 避免 png 图片背景为黑色
          *
          * 1. 生成颜色 白色
          * 2. 将颜色定义为透明色
          */
-//        $transparent_cav = imagecolorallocatealpha($image_cav,255,255 , 255 , 127);
-//        $transparent_watermark = imagecolorallocatealpha($watermark_cav,255,255 , 255 , 127);
-        $transparent_watermark = imagecolorallocatealpha($watermark_cav,255,255 , 255 , 127);
-        // 设置透明
-
-//        imagecolortransparent($image_cav , $transparent_cav);
-//        imagefill($image_cav,0,0 , $transparent_cav);
-
-
-        imagecolortransparent($watermark_cav , $transparent_watermark);
-        imagefill($watermark_cav,0,0 , $transparent_watermark);
+        $this->transparent($watermark_cav);
 
         switch ($watermark_info['extension'])
         {
@@ -439,9 +443,7 @@ class ImageProcessor {
                 $watermark_src_cav = imagecreatefrompng($watermark);
                 break;
         }
-        $transparent_watermark_src = imagecolorallocatealpha($watermark_src_cav,255,255 , 255 , 127);
-        imagecolortransparent($watermark_src_cav , $transparent_watermark_src);
-        imagefill($watermark_src_cav,0,0 , $transparent_watermark_src);
+        $this->transparent($watermark_src_cav);
 
         imagecopyresampled($watermark_cav , $watermark_src_cav , 0 , 0 , 0 , 0 , $option['size']['width'] , $option['size']['height'] , $watermark_info['width'] , $watermark_info['height']);
         // 计算水印位置
