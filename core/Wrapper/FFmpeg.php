@@ -4,14 +4,14 @@
  * * 2020-07-27
  *
  * 视频 | 图片处理类
+ *
+ *
  */
 
 namespace Core\Wrapper;
 
 
-use Core\Lib\File;
 use Exception;
-use function core\format_path;
 
 class FFmpeg
 {
@@ -25,8 +25,6 @@ class FFmpeg
 
     private $sizeCommand = '';
 
-    private $filterCommand = '';
-
     private $framesCommand = '';
 
     private $ssForInputCommand = '';
@@ -37,6 +35,10 @@ class FFmpeg
 
     private $durationForOutputCommand = '';
 
+    private $fpsForInputCommand = '';
+
+    private $fpsForOutputCommand = '';
+
     private $toForInputCommand = '';
 
     private $toForOutputCommand = '';
@@ -45,7 +47,13 @@ class FFmpeg
 
     private $output = '';
 
-    private $input = '';
+    private $input = [];
+
+    private $subtitleForInputCommand = '';
+
+    private $subtitleForOutputCommand = '';
+
+    private $debug = false;
 
 
     public function __construct()
@@ -66,7 +74,7 @@ class FFmpeg
 
     public function input(string $input): FFmpeg
     {
-        $this->input = "\"" . $input . "\"";
+        $this->input[] = "\"" . $input . "\"";
         return $this;
     }
 
@@ -92,7 +100,7 @@ class FFmpeg
         if (empty($fps)) {
             return $this;
         }
-        $this->filterCommand = '-filter:v fps=' . $fps;
+        $this->fpsForInputCommand = '-filter:v fps=' . $fps;
         return $this;
     }
 
@@ -102,7 +110,7 @@ class FFmpeg
         if (empty($fps)) {
             return $this;
         }
-        $this->filterForOutputCommand = '-filter:v fps=' . $fps;
+        $this->fpsForOutputCommand = '-filter:v fps=' . $fps;
         return $this;
     }
 
@@ -115,6 +123,39 @@ class FFmpeg
                 break;
             case 'output':
                 return $this->fpsForOutput($fps);
+                break;
+        }
+        throw new Exception('不支持的操作模式');
+    }
+
+    public function subtitleForOutput(string $subtitle = ''): FFmpeg
+    {
+        if (empty($subtitle)) {
+            return $this;
+        }
+        $subtitle = str_replace('\\' , '/' , $subtitle);
+        $this->subtitleForOutputCommand = '-filter:v "subtitles=\\\'' . $subtitle . '\\\'" ';
+        return $this;
+    }
+
+    public function subtitleForInput(string $subtitle = ''): FFmpeg
+    {
+        if (empty($subtitle)) {
+            return $this;
+        }
+        $this->subtitleForInputCommand = '-filter:v subtitles=\'"' . $subtitle . '"\' ';
+        return $this;
+    }
+
+    public function subtitle(string $subtitle , string $mode = 'output'): FFmpeg
+    {
+        switch ($mode)
+        {
+            case 'input':
+                return $this->subtitleForInput($subtitle);
+                break;
+            case 'output':
+                return $this->subtitleForOutput($subtitle);
                 break;
         }
         throw new Exception('不支持的操作模式');
@@ -244,16 +285,29 @@ class FFmpeg
     }
 
     // 设置编码器
-    // libx264 | copy 等...
-    public function codec(string $codec = 'h264'): FFmpeg
+    // h264 | copy 等...
+    public function codec(string $codec = 'copy' , string $meida = 'video'): FFmpeg
     {
-        $this->codecCommand = '-codec:v ' . $codec;
+        switch ($meida)
+        {
+            case 'video':
+                $this->codecCommand .= '-codec:v ' . $codec . ' ';
+                break;
+            case 'audio':
+                $this->codecCommand .= '-codec:a ' . $codec . ' ';
+                break;
+            case 'subtitle':
+                $this->codecCommand .= '-codec:s ' . $codec . ' ';
+                break;
+            default:
+                throw new Exception('不支持的媒体类型');
+        }
         return $this;
     }
 
     public function save(string $file): void
     {
-        $this->output = $file;
+        $this->output = '"' . $file . '"';
         $this->run();
     }
 
@@ -267,6 +321,11 @@ class FFmpeg
     {
         $this->vnCommand = '-vn ';
         return $this;
+    }
+
+    public function debug(bool $debug)
+    {
+        $this->debug = $debug;
     }
 
     // 重新运行
@@ -288,12 +347,28 @@ class FFmpeg
         if (!empty($this->toForInputCommand)) {
             $command .= $this->toForInputCommand . ' ';
         }
-        $command .= '-i ' . $this->input . ' ';
+        if (!empty($this->fpsForInputCommand)) {
+            $command .= $this->fpsForInputCommand . ' ';
+        }
+        if (preg_match("/filter:v/" , $command) > 0) {
+            $command .= str_replace('filter:v ' , '' , $this->subtitleForInputCommand);
+        } else {
+            $command .= $this->subtitleForInputCommand;
+        }
+        foreach ($this->input as $v)
+        {
+            $command .= '-i ' . $v . ' ';
+        }
         if (!empty($this->framesCommand)) {
             $command .= $this->framesCommand . ' ';
         }
-        if (!empty($this->filterCommand)) {
-            $command .= $this->filterCommand . ' ';
+        if (!empty($this->fpsForOutputCommand)) {
+            $command .= $this->fpsForOutputCommand . ' ';
+        }
+        if (preg_match("/filter:v/" , $command) > 0) {
+            $command .= str_replace('filter:v ' , '' , $this->subtitleForOutputCommand);
+        } else {
+            $command .= $this->subtitleForOutputCommand;
         }
         if (!empty($this->ssForOutputCommand)) {
             $command .= $this->ssForOutputCommand . ' ';
@@ -319,6 +394,10 @@ class FFmpeg
 
         $command .= $this->output;
 
+        if ($this->debug) {
+            // 调试模式
+            file_put_contents(__DIR__ . '/ffmpeg.log' , '【' . date('Y-m-d H:i:s') . '】 ' . $command . "\n" , FILE_APPEND);
+        }
         exec($command , $res , $status);
         if ($status > 0) {
             throw new Exception("ffmpeg 执行发生错误\n command: " . $command . "\nerror: " . implode("\n" , $res));
