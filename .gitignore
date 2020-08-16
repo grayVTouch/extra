@@ -1,1 +1,8 @@
 core/Lib/*.log
+core/Wrapper/*.log
+*.mp4
+*.mkv
+*.avi
+*.rm
+*.rmvb
+*.mov
