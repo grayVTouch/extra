@@ -520,30 +520,46 @@ function format_time($duration = 0 , $format = 'D天H时I分S秒' , $isZeroAdd =
     $s		  = $duration - $costTime;
 
     if ($format === 'D天H时I分S秒') {
-        return $d . '天' . $h . '时' . $i . '分' . $s . '秒';
+        $res = '';
+
+        if (!empty($d)) {
+            $res .= $d . '天';
+        }
+
+        if (!empty($h)) {
+            $res .= $h . '时';
+        }
+
+        $res .= $i . '分';
+        $res .= $s . '秒';
+
+        return $res;
     }
 
     if ($format === 'HH:II:SS') {
         if ($isZeroAdd) {
-            if ($h < 10) {
-                $h = '0' . $h;
+            $res = '';
+            if (!empty($h)) {
+                if ($h < 10) {
+                    $h = '0' . $h;
+                }
+                $res .= $h . ':';
             }
-
-            $h .= ':';
 
             if ($i < 10) {
                 $i = '0' . $i;
             }
 
-            $i.= ':';
+            $res .= $i . ':';
 
             if ($s < 10) {
                 $s = '0' . $s;
             }
 
-            return $h . $i . $s;
+            $res .= $s;
+
+            return $res;
         } else {
-            $d = $d === 0 ? '' : $d . ':';
             $h = $h === 0 ? '' : $h . ':';
 
             if ($i < 10) {
@@ -556,7 +572,7 @@ function format_time($duration = 0 , $format = 'D天H时I分S秒' , $isZeroAdd =
                 $s = '0' . $s;
             }
 
-            return $d . $h . $i . $s;
+            return $h . $i . $s;
         }
     }
 
