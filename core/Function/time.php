@@ -12,7 +12,7 @@ use DateTime;
 use DateTimeZone;
 use Exception;
 
-function current_time(DateTimeZone $time_zone = null): string
+function current_datetime(DateTimeZone $time_zone = null): string
 {
     if (empty($time_zone)) {
         $time_zone = new DateTimeZone('Asia/Shanghai');
