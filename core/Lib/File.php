@@ -323,6 +323,11 @@ class File {
         return rename($file , $target);
     }
 
+    public static function rename(string $file , string $target)
+    {
+        return rename($file , $target);
+    }
+
     // 删除文件 或 目录
     public static function delete(string $path)
     {

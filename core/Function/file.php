@@ -91,10 +91,9 @@ function get_file_info($path = ''){
 
 // 获取文件名（URL || Local Path 都可，不检查文件是否存在）
 function get_filename($path = ''){
-    $path = format_path($path);
-    $s_idx = mb_strrpos($path , '/');
-    $s_idx = $s_idx === false ? 0 : $s_idx + 1;
-
+    $path   = format_path($path);
+    $s_idx  = mb_strrpos($path , '/');
+    $s_idx  = $s_idx === false ? 0 : $s_idx + 1;
     return mb_substr($path , $s_idx);
 }
 

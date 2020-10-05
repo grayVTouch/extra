@@ -12,7 +12,7 @@ function array_to_obj(array $arr){
     return json_decode(json_encode($arr));
 }
 
-function convert_obj($value)
+function convert_object($value)
 {
     return json_decode(json_encode($value));
 }
