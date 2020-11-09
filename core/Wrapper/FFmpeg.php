@@ -55,6 +55,8 @@ class FFmpeg
 
     private $debug = false;
 
+    private $log = '';
+
 
     public function __construct()
     {
@@ -91,6 +93,12 @@ class FFmpeg
         $size_command .= empty($height) ? '' : $height;
         $size_command = ltrim($size_command , 'x');
         $this->sizeCommand = $size_command;
+        return $this;
+    }
+
+    public function quiet(): FFmpeg
+    {
+        $this->log = '-v quiet';
         return $this;
     }
 
@@ -390,6 +398,9 @@ class FFmpeg
         }
         if (!empty($this->codecCommand)) {
             $command .= $this->codecCommand . ' ';
+        }
+        if (!empty($this->log)) {
+            $command .= $this->log . ' ';
         }
 
         $command .= $this->output;

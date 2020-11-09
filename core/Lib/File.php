@@ -11,8 +11,6 @@ namespace Core\Lib;
 use Exception;
 
 use function core\format_path;
-use function core\gbk;
-use function core\utf8;
 
 class File {
 	private static $_instance = null;
@@ -21,7 +19,6 @@ class File {
 	    if (self::$_instance instanceof self) {
             throw new Exception("不允许重复实例化");
         }
-
         self::getInstance();
     }
 
@@ -30,7 +27,6 @@ class File {
 		if (!self::$_instance instanceof self) {
 			self::$_instance = new self();
 		}
-
 		return self::$_instance;
 	}
 
@@ -39,16 +35,14 @@ class File {
 	 * @param  String $path 文件路径（相对 | 绝对路径）
 	 * @return String
 	 */
-	public static function getRealPath($path = ''){
+	public static function getRealPath($path = '')
+    {
 		$path = format_path($path);
-		$path = gbk($path);
 		$path = realpath($path);
-
 		if (!$path) {
 			return false;
 		}
-
-		return utf8($path);
+		return $path;
 	}
 
 	/*
@@ -56,18 +50,15 @@ class File {
 	 * @param String $file  文件路径
 	 * @return String
 	 */
-	public static function getType($path = ''){
+	public static function getType($path = '')
+    {
         $path = format_path($path);
-        $path = gbk($path);
-
 		if (!file_exists($path)) {
 			return false;
 		}
-
 		if (is_dir($path)) {
 			return 'dir';
 		}
-
 		return 'file';
 	}
 
@@ -76,18 +67,15 @@ class File {
 	 * @param String $file 文件路径
 	 * @return true | false
 	 */
-	public static function isFile($path = ''){
+	public static function isFile($path = '')
+    {
         $path = format_path($path);
-        $path = gbk($path);
-
 		if (!file_exists($path)) {
 			return false;
 		}
-
 		if (is_dir($path)) {
 			return false;
 		}
-
 		return true;
 	}
 
@@ -96,36 +84,32 @@ class File {
 	 * @param String             $dir       目录路径
 	 * @return true | false
 	 */
-	public static function isDir($path = ''){
+	public static function isDir($path = ''): bool
+    {
         $path = format_path($path);
-        $path = gbk($path);
-
         if (!file_exists($path)) {
             return false;
         }
-
         if (is_dir($path)) {
 			return true;
 		}
-
 		return false;
 	}
 
 	/*
 	 * 创建目录
 	 * @param String   $dir          目录路径
-	 * @param Integer  $privilege    目录权限
+	 * @param Integer  $permission    目录权限
 	 * @return true | false
 	 */
-	public static function cDir($dir = '' , $privilege = 0755 , $recursive = false){
+	public static function cDir($dir = '' , $permission = 0755 , $recursive = false): bool
+    {
 		if (!self::isDir($dir)) {
 			$dir = format_path($dir);
-			$dir = gbk($dir);
-			$mk  = mkdir($dir , $privilege , $recursive);
-
+			$mk  = mkdir($dir , $permission , $recursive);
 			if (!$mk) {
 				$err_msg  = "创建目录失败\n";
-				$err_msg .= "待创建的目录路径： " . utf8($dir) . "\n";
+				$err_msg .= "待创建的目录路径： " . $dir . "\n";
 				throw new Exception($err_msg);
 			}
 		}
@@ -136,29 +120,25 @@ class File {
 	/*
 	 * 直接根据路径创建文件
 	 * @param String   $dir          文件路径
-	 * @param Integer  $privilege    文件权限
+	 * @param Integer  $permission    文件权限
 	 * @return true | false
 	 */
-	public static function cFile($file = '' , $privilege = 0755){
+	public static function cFile($file = '' , $permission = 0755): bool
+    {
 		if (!self::isFile($file)) {
-			$file = format_path($file);
-			$file = gbk($file);
-
-			$f = fopen($file , 'x');
-
-			if (!$f) {
+			$file   = format_path($file);
+			$res    = fopen($file , 'x');
+			if (!$res) {
 				$err_msg  = "创建文件失败！" . "\n";
-				$err_msg .= "待创建的文件路径： " . utf8($file) . "\n";
+				$err_msg .= "待创建的文件路径： " . $file . "\n";
 				throw new Exception($err_msg);
 			}
-
-			if (!chmod($file , $privilege)) {
+			if (!chmod($file , $permission)) {
 				$err_msg  = "设置文件权限失败" . "\n";
-				$err_msg .= "待设置权限的文件路径： " . utf8($file) . "\n";
+				$err_msg .= "待设置权限的文件路径： " . $file . "\n";
 				throw new Exception($err_msg);
 			}
-
-			fclose($f);
+			fclose($res);
 		}
 
 		return true;
@@ -170,36 +150,33 @@ class File {
 	 * @param	$content     $contents   待写入的数据
 	 * @param   $write_type  $write_type 写入类型
 	 */
-	public static function write($file = '' , $content = '' , $type = null){
+	public static function write($file = '' , $content = '' , $type = null): void
+    {
 		if (!self::isFile($file)) {
 			self::cFile($file);
 		}
-
-		$file = format_path($file);
-		$file = gbk($file);
-		$range = ['a' , 'w'];
-		$type = in_array($type , $range) ? $type : 'a';
-		$f = fopen($file , $type);
-
-		if (!$f) {
+		$file   = format_path($file);
+		$range  = ['a' , 'w'];
+		$type   = in_array($type , $range) ? $type : 'a';
+		$res    = fopen($file , $type);
+		if (!$res) {
 			$err_msg  = "打开文件失败\n";
-			$err_msg .= "待写入的文件路径：" . utf8($file) . "\n";
+			$err_msg .= "待写入的文件路径：" . $file . "\n";
 			throw new Exception($err_msg);
 		}
-
-		if (!flock($f , LOCK_EX)) {
+		if (!flock($res , LOCK_EX)) {
             $err_msg  = "文件已被占用\n";
-            $err_msg .= "待锁定的文件路径：" . utf8($file) . "\n";
+            $err_msg .= "待锁定的文件路径：" . $file . "\n";
             throw new Exception($err_msg);
 		}
-
-        fwrite($f , $content);
-        flock($f , LOCK_UN);
-        fclose($f);
+        fwrite($res , $content);
+        flock($res , LOCK_UN);
+        fclose($res);
 	}
 
 	// 获取文件 & 目录
-	public static function get($dir = '' , bool $is_recursive = true , bool $save_structure = true){
+	public static function get($dir , bool $is_recursive = true , bool $save_structure = true): array
+    {
 		if (!self::isDir($dir)){
 			throw new Exception("参数 1 不是目录： " . $dir);
 		}
@@ -207,7 +184,6 @@ class File {
 		$is_recursive = is_bool($is_recursive) ? $is_recursive : true;
         $get = function($dir = '' , array &$result = [] , array &$res_with_structure = []) use(&$get , $is_recursive , $save_structure) {
 			$dir = format_path($dir);
-			$dir = gbk($dir);
 			$d   = dir($dir);
 			if (empty($d)) {
 				throw new Exception("无法打开当前目录：" . $dir);
@@ -217,7 +193,7 @@ class File {
                 if ($fname == '.' || $fname == '..'){
                     continue ;
                 }
-                $fname = utf8($dir) . '/' . utf8($fname);
+                $fname = $dir . '/' . $fname;
                 if ($save_structure) {
                     if (!$is_recursive) {
                         $res_with_structure[] = $fname;
@@ -256,14 +232,16 @@ class File {
 	}
 
 	// 获取文件
-	public static function getFiles($dir = '' , $is_recursive = true){
+	public static function getFiles($dir = '' , $is_recursive = true)
+    {
 		$is_recursive = is_bool($is_recursive) ? $is_recursive : true;
 		$res = self::get($dir , $is_recursive , false);
 		return $res['file'];
 	}
 
 	// 获取目录
-	public static function getDirs($dir , $is_recursive = true){
+	public static function getDirs($dir , $is_recursive = true)
+    {
         $is_recursive = is_bool($is_recursive) ? $is_recursive : true;
         $res = self::get($dir, $is_recursive , false);
         return $res['dir'];
@@ -271,21 +249,20 @@ class File {
 
 
 	// 删除单个文件
-	public static function dFile($file = ''){
+	public static function dFile($file = '')
+    {
 		if (!self::isFile($file)) {
             return ;
 		}
-
         $file = format_path($file);
-        $file = gbk($file);
-
         if (!unlink($file)) {
-            throw new Exception('删除文件失败： ' . utf8($file));
+            throw new Exception('删除文件失败： ' . $file);
         }
 	}
 
 	// 删除多个文件
-	public static function dFiles(array $files = []){
+	public static function dFiles(array $files = [])
+    {
         foreach ($files as $v)
         {
             self::dFile($v);
@@ -293,21 +270,20 @@ class File {
 	}
 
 	// 删除单个目录
-    public static function dDir($dir){
+    public static function dDir($dir): void
+    {
 	    if (!self::isDir($dir)) {
 	        return ;
         }
-
         $dir = format_path($dir);
-	    $dir = gbk($dir);
-
         if (!rmdir($dir)) {
-            throw new Exception('删除目录失败：' . utf8($dir));
+            throw new Exception('删除目录失败：' . $dir);
         }
     }
 
     // 删除多个目录
-    public static function dDirs(array $dirs = []){
+    public static function dDirs(array $dirs = [])
+    {
         foreach ($dirs as $v)
         {
             self::dDir($v);
@@ -338,6 +314,7 @@ class File {
         $res = self::get($path , true , false);
         self::dFiles($res['file']);
         self::dDirs($res['dir']);
+        self::dDir($path);
     }
 
     // 创建目录

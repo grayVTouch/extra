@@ -3,10 +3,8 @@
 namespace core;
 
 // 去除文件路径中最末尾的 /
-function remove_backslash($str=''){
-    $last_char = $str[mb_strlen($str) - 1];
-
-    return $last_char === '/' || $last_char === "\\" ? mb_substr($str , 0 , mb_strlen($str) - 1) : $str;
+function remove_backslash(string $string){
+    return rtrim($string , '/\\');
 }
 
 // 处理路径中的斜杠
@@ -98,17 +96,15 @@ function get_filename($path = ''){
 }
 
 // 获取扩展名（URL || Local Path 都可）
-function get_extension($path = ''){
-    $path = format_path($path);
-    $s_idx = mb_strrpos($path , '.');
-
-    if ($s_idx !== false) {
-        $s_idx += 1;
-
-        return mb_substr($path , $s_idx);
+function get_extension(string $path): string
+{
+    $path   = format_path($path);
+    $s_idx  = mb_strrpos($path , '.');
+    if ($s_idx === false) {
+        return '';
     }
-
-    return false;
+    $s_idx += 1;
+    return mb_substr($path , $s_idx);
 }
 
 /*

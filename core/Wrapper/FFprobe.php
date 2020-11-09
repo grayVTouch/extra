@@ -24,7 +24,7 @@ class FFprobe
             throw new Exception('请提供有效文件：' . $file);
         }
         $this->file = $file;
-        $command = 'ffprobe -v quiet -show_format -show_streams -print_format json ' . $this->file;
+        $command = "ffprobe -v quiet -show_format -show_streams -print_format json \"{$this->file}\"";
         exec($command , $info , $status);
         if ($status > 0) {
             throw new Exception('无法获取视频信息');
@@ -32,6 +32,7 @@ class FFprobe
         $json = implode("\n" , $info);
         $info = json_decode($json , true);
         $this->info = $info;
+
     }
 
     /**
