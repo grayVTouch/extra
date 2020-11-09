@@ -29,7 +29,7 @@ function chunk(array $data = [] , $size = 10){
 }
 
 // StdClass 转换成数组
-function obj_to_array($obj){
+function object_to_array($obj){
     return json_decode(json_encode($obj) , true);
 }
 

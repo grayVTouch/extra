@@ -17,7 +17,7 @@ class UploadFile {
     protected $_dir = '';
     function __construct($dir = ''){
         if (!File::isDir($dir)) {
-            File::cDir($dir);
+            File::mkdir($dir);
         }
         $dir = format_path($dir);
         $this->_dir = $dir;
@@ -111,7 +111,7 @@ class UploadFile {
         $dir    = $this->_dir . '/' . $date;
 
         if (!File::isDir($dir)) {
-            File::cDir($dir);
+            File::mkdir($dir);
         }
 
         $path = $dir . '/' . $fname;
