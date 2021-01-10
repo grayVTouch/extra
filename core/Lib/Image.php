@@ -94,7 +94,7 @@ class Image {
 		$this->powerUp();
 		$type_range = ['gif' , 'jpg' , 'png'];
 		if (!in_array($info['extension'] , $type_range)) {
-            return new Exception('不支持的文件类型');
+            throw new Exception('不支持的文件类型');
         }
         switch ($info['extension'])
         {

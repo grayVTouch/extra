@@ -153,7 +153,7 @@ class ImageProcessor {
 		// 提高脚本性能
 		$this->powerUp();
 		if (!in_array($info['extension'] , $this->extensionRange)) {
-            return new Exception('不支持的文件类型，当前支持的文件类型有：' . implode(',' , $this->extensionRange));
+            throw new Exception('不支持的文件类型，当前支持的文件类型有：' . implode(',' , $this->extensionRange));
         }
         switch ($info['extension'])
         {
