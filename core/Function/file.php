@@ -59,7 +59,7 @@ function get_file_info_from_str($str = ''){
 */
 function get_file_info($path = ''){
     $path = format_path($path);
-    $path = gbk($path);
+//    $path = gbk($path);
 
     if (!file_exists($path)) {
         return false;
@@ -114,7 +114,7 @@ function get_extension(string $path): string
  */
 function get_mime($file = ''){
     $file = format_path($file);
-    $file = gbk($file);
+//    $file = gbk($file);
 
     if (!file_exists($file)) {
         return false;
@@ -138,14 +138,13 @@ function get_mime($file = ''){
  * @return Array
  */
 function get_image_info($file = ''){
-    $type_range = array('image/gif' , 'image/jpeg' , 'image/png' , 'image/swf');
     $info  = get_file_info($file);
 
     if (!$info) {
         return false;
     }
 
-    $file  = gbk($file);
+//    $file  = gbk($file);
     $image = getimagesize($file);
 
     $info['width']  = $image['0'];
@@ -184,7 +183,8 @@ function load_files($files){
         $v = realpath($v);
 
         if (!in_array($v , $filename_list)) {
-            $file_list[$v] = require gbk($v);
+//            $file_list[$v] = require gbk($v);
+            $file_list[$v] = require($v);
         }
     }
 

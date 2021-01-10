@@ -95,7 +95,15 @@ class ImageProcessor {
         imagefill($cav,0,0 , $transparent_cav);
     }
 
-    // 图片压缩
+    /**
+     * 图片压缩
+     *
+     * @param string $image
+     * @param array|null $option
+     * @param bool $base64
+     * @return string
+     * @throws Exception
+     */
 	public function compress(string $image = '' , array $option = null , bool $base64 = true): string
     {
         if (!File::isFile($image)) {
@@ -153,7 +161,7 @@ class ImageProcessor {
 		// 提高脚本性能
 		$this->powerUp();
 		if (!in_array($info['extension'] , $this->extensionRange)) {
-            return new Exception('不支持的文件类型，当前支持的文件类型有：' . implode(',' , $this->extensionRange));
+            throw new Exception('不支持的文件类型，当前支持的文件类型有：' . implode(',' , $this->extensionRange));
         }
         switch ($info['extension'])
         {
