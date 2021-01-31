@@ -3,10 +3,8 @@
 namespace core;
 
 // 去除文件路径中最末尾的 /
-function remove_backslash($str=''){
-    $last_char = $str[mb_strlen($str) - 1];
-
-    return $last_char === '/' || $last_char === "\\" ? mb_substr($str , 0 , mb_strlen($str) - 1) : $str;
+function remove_backslash(string $string){
+    return rtrim($string , '/\\');
 }
 
 // 处理路径中的斜杠
@@ -61,7 +59,7 @@ function get_file_info_from_str($str = ''){
 */
 function get_file_info($path = ''){
     $path = format_path($path);
-    $path = gbk($path);
+//    $path = gbk($path);
 
     if (!file_exists($path)) {
         return false;
@@ -91,25 +89,22 @@ function get_file_info($path = ''){
 
 // 获取文件名（URL || Local Path 都可，不检查文件是否存在）
 function get_filename($path = ''){
-    $path = format_path($path);
-    $s_idx = mb_strrpos($path , '/');
-    $s_idx = $s_idx === false ? 0 : $s_idx + 1;
-
+    $path   = format_path($path);
+    $s_idx  = mb_strrpos($path , '/');
+    $s_idx  = $s_idx === false ? 0 : $s_idx + 1;
     return mb_substr($path , $s_idx);
 }
 
 // 获取扩展名（URL || Local Path 都可）
-function get_extension($path = ''){
-    $path = format_path($path);
-    $s_idx = mb_strrpos($path , '.');
-
-    if ($s_idx !== false) {
-        $s_idx += 1;
-
-        return mb_substr($path , $s_idx);
+function get_extension(string $path): string
+{
+    $path   = format_path($path);
+    $s_idx  = mb_strrpos($path , '.');
+    if ($s_idx === false) {
+        return '';
     }
-
-    return false;
+    $s_idx += 1;
+    return mb_substr($path , $s_idx);
 }
 
 /*
@@ -119,7 +114,7 @@ function get_extension($path = ''){
  */
 function get_mime($file = ''){
     $file = format_path($file);
-    $file = gbk($file);
+//    $file = gbk($file);
 
     if (!file_exists($file)) {
         return false;
@@ -143,14 +138,13 @@ function get_mime($file = ''){
  * @return Array
  */
 function get_image_info($file = ''){
-    $type_range = array('image/gif' , 'image/jpeg' , 'image/png' , 'image/swf');
     $info  = get_file_info($file);
 
     if (!$info) {
         return false;
     }
 
-    $file  = gbk($file);
+//    $file  = gbk($file);
     $image = getimagesize($file);
 
     $info['width']  = $image['0'];
@@ -189,7 +183,8 @@ function load_files($files){
         $v = realpath($v);
 
         if (!in_array($v , $filename_list)) {
-            $file_list[$v] = require gbk($v);
+//            $file_list[$v] = require gbk($v);
+            $file_list[$v] = require($v);
         }
     }
 

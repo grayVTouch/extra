@@ -95,7 +95,15 @@ class ImageProcessor {
         imagefill($cav,0,0 , $transparent_cav);
     }
 
-    // 图片压缩
+    /**
+     * 图片压缩
+     *
+     * @param string $image
+     * @param array|null $option
+     * @param bool $base64
+     * @return string
+     * @throws Exception
+     */
 	public function compress(string $image = '' , array $option = null , bool $base64 = true): string
     {
         if (!File::isFile($image)) {
