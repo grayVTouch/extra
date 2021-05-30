@@ -8,7 +8,7 @@
 
 namespace core;
 
-function array_to_obj(array $arr){
+function array_to_object(array $arr){
     return json_decode(json_encode($arr));
 }
 
