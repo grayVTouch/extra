@@ -8,11 +8,20 @@
 
 namespace core;
 
-function array_to_object(array $arr){
-    return json_decode(json_encode($arr));
+use stdClass;
+
+function array_to_object(array $array)
+{
+    return json_decode(json_encode($array));
 }
 
 function convert_object($value)
 {
     return json_decode(json_encode($value));
+}
+
+
+function empty_object(): stdClass
+{
+    return array_to_object([]);
 }
