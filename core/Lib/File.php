@@ -210,7 +210,7 @@ class File {
                     continue ;
                 }
                 if (self::isDir($fname)) {
-                    $result['dir'][] = $fname . '/';
+                    $result['dir'][] = $fname;
                     if ($is_recursive){
                         $get($fname , $result);
                     }
