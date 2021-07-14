@@ -158,6 +158,8 @@ class ImageProcessor {
 		    throw new Exception("不支持的 mode【{$mode}】");
         }
         $info = get_image_info($image);
+		$w = $info['width'] < $w ? $info['width'] : $w;
+		$h = $info['height'] < $h ? $info['height'] : $h;
 		switch ($mode)
         {
             case 'ratio':
@@ -241,6 +243,8 @@ class ImageProcessor {
         } else {
             $res = $file;
         }
+        imagedestroy($img);
+        imagedestroy($cav);
 		$this->powerReset();
 		return $res;
 	}
