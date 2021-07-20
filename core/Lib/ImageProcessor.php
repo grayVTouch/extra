@@ -20,17 +20,17 @@ class ImageProcessor {
     /**
      * @var null
      */
-    private $oMemoryLimit = null;
+    private static $oMemoryLimit = null;
 
     /*
      * @var null
      */
-    private $oMaxExcutionTime = null;
+    private static $oMaxExcutionTime = null;
 
 
-    private $memoryLimit = '2048M';
+    private static $memoryLimit = '2048M';
 
-    private $maxExcutionTime = 0;
+    private static $maxExcutionTime = 0;
 
     private $positionRange  = [
         'top' ,
@@ -44,7 +44,14 @@ class ImageProcessor {
         'bottom_right'
     ];
 
-    private $extensionRange = ['gif' , 'jpg' , 'png' , 'jpeg'];
+    private static $extensionRange = [
+        'gif' ,
+        'jpg' ,
+        'png' ,
+        'jpeg' ,
+        'webp' ,
+        'bmp' ,
+    ];
 
     public $fontFile = '';
 
@@ -72,19 +79,19 @@ class ImageProcessor {
         }
     }
 
-    private function powerUp()
+    private static function powerUp()
     {
-        $this->oMemoryLimit  = ini_get('memory_limit');
-        $this->oMaxExcutionTime    = ini_get('max_execution_time');
-        ini_set('memory_limit' , $this->memoryLimit);
-        ini_set('max_execution_time' , $this->maxExcutionTime);
+        self::$oMemoryLimit  = ini_get('memory_limit');
+        self::$oMaxExcutionTime    = ini_get('max_execution_time');
+        ini_set('memory_limit' , self::$memoryLimit);
+        ini_set('max_execution_time' , self::$maxExcutionTime);
     }
 
     // 性能配置恢复
-    private function powerReset()
+    private static function powerReset()
     {
-        ini_set('memory_limit' , $this->oMemoryLimit);
-        ini_set('max_excution_time' , $this->oMaxExcutionTime);
+        ini_set('memory_limit' , self::$oMemoryLimit);
+        ini_set('max_excution_time' , self::$oMaxExcutionTime);
     }
 
     public static function transparent($cav)
@@ -107,7 +114,7 @@ class ImageProcessor {
 	public function compress(string $image = '' , array $option = null , bool $base64 = true): string
     {
         if (!File::isFile($image)) {
-            throw new Exception('未找到对应文件');
+            throw new Exception("未找到对应文件【{$image}】");
         }
         $default = [
             /**
@@ -120,10 +127,14 @@ class ImageProcessor {
              */
             'mode'      => 'ratio' ,
             'ratio'     => 0.5 ,
+            // 质量
+            'quality'     => 100 ,
             // 处理后图片宽度
             'width'     => 1920 ,
             // 处理后图片高度
             'height'    => 1080 ,
+            // 输出文件类型（如果指定，那么将会以这种类型输出，否则以源文件类型输出）
+            'extension' => '' ,
         ];
 		$mode_range = [
 		    'ratio' ,
@@ -132,9 +143,11 @@ class ImageProcessor {
             'fix-height'
         ];
 		$option['mode']     = isset($option['mode']) && in_array($option['mode'] , $mode_range) ? $option['mode'] : $default['mode'];
-		$option['width']    = isset($option['width']) && !empty($option['width']) ? $option['width'] : $default['width'];
-		$option['height']   = isset($option['height']) && !empty($option['height']) ? $option['height'] : $default['height'];
-		$option['ratio']    = isset($option['ratio']) && !empty($option['ratio']) ? $option['ratio'] : $default['ratio'];
+		$option['width']    = !empty($option['width']) ? $option['width'] : $default['width'];
+		$option['height']   = !empty($option['height']) ? $option['height'] : $default['height'];
+		$option['ratio']    = !empty($option['ratio']) ? $option['ratio'] : $default['ratio'];
+		$option['quality']    = !empty($option['quality']) ? $option['quality'] : $default['quality'];
+		$option['extension']    = !empty($option['extension']) ? $option['extension'] : $default['extension'];
 
 		$mode   = $option['mode'];
 		$w      = $option['width'];
@@ -142,9 +155,11 @@ class ImageProcessor {
 		$ratio  = $option['ratio'];
 
 		if (!in_array($mode , $mode_range)) {
-		    throw new Exception('不支持的 mode');
+		    throw new Exception("不支持的 mode【{$mode}】");
         }
         $info = get_image_info($image);
+		$w = $info['width'] < $w ? $info['width'] : $w;
+		$h = $info['height'] < $h ? $info['height'] : $h;
 		switch ($mode)
         {
             case 'ratio':
@@ -160,8 +175,8 @@ class ImageProcessor {
         }
 		// 提高脚本性能
 		$this->powerUp();
-		if (!in_array($info['extension'] , $this->extensionRange)) {
-            throw new Exception('不支持的文件类型，当前支持的文件类型有：' . implode(',' , $this->extensionRange));
+		if (!in_array($info['extension'] , self::$extensionRange)) {
+            throw new Exception("不支持的文件类型【{$info['extension']}】，当前支持的文件类型有：" . implode(',' , self::$extensionRange));
         }
         switch ($info['extension'])
         {
@@ -175,6 +190,9 @@ class ImageProcessor {
             case 'png':
                 $img = imagecreatefrompng($image);
                 break;
+            case 'webp':
+                $img = imagecreatefromwebp($image);
+                break;
         }
 
         $cav = imagecreatetruecolor($w , $h);
@@ -184,21 +202,25 @@ class ImageProcessor {
         imagecopyresampled($cav , $img , 0 , 0 , 0 , 0 , $w , $h , $info['width'] , $info['height']);
         $filename = date('YmdHis') . random(6 , 'letter' , true) . '.' . $info['extension'];
         $file = $this->dir . '/' . $filename;
-        switch ($info['extension'])
+        $extension = empty($option['extension']) ? $info['extension'] : $option['extension'];
+        switch ($extension)
         {
             case 'gif':
                 $save = imagegif($cav , $file);
                 break;
             case 'jpg':
             case 'jpeg':
-                $save = imagejpeg($cav , $file);
+                $save = imagejpeg($cav , $file , $option['quality']);
                 break;
             case 'png':
                 $save = imagepng($cav , $file);
                 break;
+            case 'webp':
+                $save = imagewebp($cav , $file , $option['quality']);
+                break;
         }
         if (!$save) {
-            throw new Exception('保存图像失败');
+            throw new Exception("保存图像失败【保存路径：{$save}】");
         }
         $res = '';
         if ($base64) {
@@ -221,6 +243,8 @@ class ImageProcessor {
         } else {
             $res = $file;
         }
+        imagedestroy($img);
+        imagedestroy($cav);
 		$this->powerReset();
 		return $res;
 	}
@@ -246,7 +270,7 @@ class ImageProcessor {
             throw new Exception('待处理的图片不存在：' . $img);
         }
         $extension  = get_extension($img);
-        if (!in_array($extension , $this->extensionRange)) {
+        if (!in_array($extension , self::$extensionRange)) {
             return false;
         }
         $info = get_image_info($img);
@@ -360,10 +384,10 @@ class ImageProcessor {
         }
         $watermark_info = get_image_info($watermark);
         $image_info     = get_image_info($image);
-        if (!in_array($image_info['extension'] , $this->extensionRange)) {
+        if (!in_array($image_info['extension'] , self::$extensionRange)) {
             throw new Exception('参数 1 文件类型错误');
         }
-        if (!in_array($watermark_info['extension'] , $this->extensionRange)) {
+        if (!in_array($watermark_info['extension'] , self::$extensionRange)) {
             throw new Exception('参数 2 文件类型错误');
         }
         $default = [
@@ -641,4 +665,62 @@ class ImageProcessor {
         return $res;
     }
 
+    // 原图压缩 - 会删除源文件 并且在相同位置生成压缩后的图片
+    public static function originCompress(string $image , string $extension = 'webp' , int $quality = 75): string
+    {
+        if (!File::isFile($image)) {
+            throw new Exception("未找到对应文件【{$image}】");
+        }
+        $range = ['webp' , 'jpeg' , 'jpg'];
+        if (!in_array($extension , $range)) {
+            throw new Exception("不支持的输出文件类型【{$extension}】，当前受支持的类型有：" . implode(',' , $range));
+        }
+        $info = get_image_info($image);
+        self::powerUp();
+        if (!in_array($info['extension'] , self::$extensionRange)) {
+            throw new Exception("不支持的文件类型【{$info['extension']}】，当前支持的文件类型有：" . implode(',' , self::$extensionRange));
+        }
+        switch ($info['extension'])
+        {
+            case 'gif':
+                $img = imagecreatefromgif($image);
+                break;
+            case 'jpg':
+            case 'jpeg':
+                $img = imagecreatefromjpeg($image);
+                break;
+            case 'png':
+                $img = imagecreatefrompng($image);
+                break;
+            case 'webp':
+                $img = imagecreatefromwebp($image);
+                break;
+        }
+        $w = $info['width'];
+        $h = $info['height'];
+        $cav = imagecreatetruecolor($w , $h);
+        self::transparent($cav);
+
+        // 平滑缩小到指定大小
+        imagecopyresampled($cav , $img , 0 , 0 , 0 , 0 , $w , $h , $info['width'] , $info['height']);
+
+        $point_last_position = mb_strrpos($image , '.');
+        $target = mb_substr($image , 0 , $point_last_position);
+        $target .= '【' . random(6 , 'letter' , true) . '】.' . $extension;
+
+        switch ($extension)
+        {
+            case 'jpg':
+            case 'jpeg':
+                imagejpeg($cav , $target , $quality);
+                break;
+            case 'webp':
+                imagewebp($cav , $target , $quality);
+                break;
+        }
+        imagedestroy($cav);
+        imagedestroy($img);
+        self::powerReset();
+        return $target;
+    }
 }
