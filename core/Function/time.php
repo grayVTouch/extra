@@ -274,6 +274,9 @@ function get_time_diff($timestamp){
 
     $distance = $cur_timestamp - $timestamp;
 
+    $his = date('H:i:s' , $timestamp);;
+    $hi = date('H:i' , $timestamp);;
+
     // 秒
     $second = 1;
     // 分
@@ -305,14 +308,14 @@ function get_time_diff($timestamp){
             $date = floor($distance / $date);
 
             if ($date == 1) {
-                return '昨天';
+                return '昨天 ' . $hi;
             }
 
             if ($date == 2) {
-                return '前天';
+                return '前天 ' . $hi;
             }
 
-            return $date . ' 天前';
+            return $date . ' 天前 ' . $hi;
         }
 
         if ($distance >= $month && $distance < $year) {
