@@ -63,28 +63,26 @@ function get_file_info($path = ''){
 
     if (!file_exists($path)) {
         return false;
-    } else {
-        if (is_dir($path)) {
-            return false;
-        } else {
-            $filename  = get_filename($path);
-            $size	   = filesize($path);
-            $extension = get_extension($path);
-            $mime	   = get_mime(utf8($path));
-
-            $filename  = $filename === false  ? 'unknow' : $filename;
-            $size	   = $size === false	  ? 'unknow' : $size;
-            $extension = $extension === false ? 'unknow' : $extension;
-            $mime      = $mime === false	  ? 'unknow' : $mime;
-
-            return array(
-                'filename'  => $filename  ,
-                'size'      => $size      ,
-                'extension' => $extension ,
-                'mime'      => $mime
-            );
-        }
     }
+    if (is_dir($path)) {
+        return false;
+    }
+    $filename  = get_filename($path);
+    $size	   = filesize($path);
+    $extension = get_extension($path);
+    $mime	   = get_mime(utf8($path));
+
+    $filename  = $filename === false  ? 'unknow' : $filename;
+    $size	   = $size === false	  ? 'unknow' : $size;
+    $extension = $extension === false ? 'unknow' : strtolower($extension);
+    $mime      = $mime === false	  ? 'unknow' : $mime;
+
+    return array(
+        'filename'  => $filename  ,
+        'size'      => $size      ,
+        'extension' => $extension ,
+        'mime'      => $mime
+    );
 }
 
 // 获取文件名（URL || Local Path 都可，不检查文件是否存在）

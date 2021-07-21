@@ -147,7 +147,7 @@ class ImageProcessor {
 		$option['height']   = !empty($option['height']) ? $option['height'] : $default['height'];
 		$option['ratio']    = !empty($option['ratio']) ? $option['ratio'] : $default['ratio'];
 		$option['quality']    = !empty($option['quality']) ? $option['quality'] : $default['quality'];
-		$option['extension']    = !empty($option['extension']) ? $option['extension'] : $default['extension'];
+		$option['extension']    = !empty($option['extension']) ? strtolower($option['extension']) : $default['extension'];
 
 		$mode   = $option['mode'];
 		$w      = $option['width'];
@@ -270,6 +270,7 @@ class ImageProcessor {
             throw new Exception('待处理的图片不存在：' . $img);
         }
         $extension  = get_extension($img);
+        $extension  = strtolower($extension);
         if (!in_array($extension , self::$extensionRange)) {
             return false;
         }
@@ -671,6 +672,7 @@ class ImageProcessor {
         if (!File::isFile($image)) {
             throw new Exception("未找到对应文件【{$image}】");
         }
+        $extension = strtolower($extension);
         $range = ['webp' , 'jpeg' , 'jpg'];
         if (!in_array($extension , $range)) {
             throw new Exception("不支持的输出文件类型【{$extension}】，当前受支持的类型有：" . implode(',' , $range));
