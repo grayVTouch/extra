@@ -333,6 +333,14 @@ class File {
     {
         return file_exists($path);
     }
+
+    public static function isEmpty(string $dir): bool
+    {
+        $res = self::get($dir , false , true);
+        return empty($res);
+    }
 }
+
+
 
 
