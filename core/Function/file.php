@@ -189,3 +189,26 @@ function load_files($files){
     return $file_list;
 }
 
+/**
+ * 检测文件编码 - 有概率会检测错误！请谨慎使用
+ * @param string $file 文件名称 或 纯字符串
+ * @return string|null 返回 编码名 或 null
+ */
+function detect_encoding(string $file): string
+{
+    $list = [
+        // 注意顺序不能改
+        'UTF-8',
+        'GBK' ,
+        'ISO-8859-1'
+    ];
+    $str = file_exists($file) ? file_get_contents($file) : $file;
+    foreach ($list as $item)
+    {
+        $tmp = mb_convert_encoding($str, $item, $item);
+        if (md5($tmp) == md5($str)) {
+            return $item;
+        }
+    }
+    return false;
+}
