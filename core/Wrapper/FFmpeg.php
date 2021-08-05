@@ -53,6 +53,8 @@ class FFmpeg
 
     private $subtitleForOutputCommand = '';
 
+    private $concatCommand = '';
+
     private $debug = false;
 
     private $log = '';
@@ -334,6 +336,19 @@ class FFmpeg
     public function debug(bool $debug)
     {
         $this->debug = $debug;
+        return $this;
+    }
+
+    public function concat(array $ts)
+    {
+        $concat = 'concat:';
+        foreach ($ts as $v)
+        {
+            $concat .= $v . '|';
+        }
+        $concat = rtrim($concat);
+        $this->input($concat);
+        return $this;
     }
 
     // 重新运行

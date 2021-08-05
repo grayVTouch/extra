@@ -42,10 +42,10 @@ class Http {
         'proxy_tunnel' => false ,
         // 代理类型
         'proxy_type' => 'http' ,
-        // 代理ip
-        'proxy' => '127.0.0.1' ,
+        // 代理ip（支持 ip + port）
+        'proxy_pass' => '' ,
         // 代理端口
-        'proxy_port' => 8888 ,
+        'proxy_port' => '' ,
     ];
 
     /**
@@ -154,7 +154,7 @@ class Http {
         // 是否开启代理通道，默认：false
         $option['proxy_tunnel'] = $option['proxy_tunnel'] ?? self::$default['proxy_tunnel'];
         $option['proxy_type']   = $option['proxy_type'] ?? self::$default['proxy_type'];
-        $option['proxy']        = $option['proxy'] ?? self::$default['proxy'];
+        $option['proxy_pass']   = $option['proxy_pass'] ?? self::$default['proxy_pass'];
         $option['proxy_port']   = $option['proxy_port'] ?? self::$default['proxy_port'];
 
         // curl 配置项
@@ -164,9 +164,6 @@ class Http {
             CURLOPT_URL => $option['url'] ,
             // 要发送的请求头
             CURLOPT_HTTPHEADER => $option['header'] ,
-//            CURLOPT_POST => $option['method'] == 'post' ,
-//            CURLOPT_PORT => $option['port'] ,
-//            CURLOPT_POSTFIELDS => $option['data'] ,
             // user-agent 必须携带！
             CURLOPT_USERAGENT => self::$userAgent ,
             // 要携带的 cookie，不知道能够坚持多久？？
@@ -183,8 +180,10 @@ class Http {
         if ($option['proxy_tunnel']) {
             // 代理
             $curl_option[CURLOPT_PROXYTYPE] = self::getProxyType($option['proxy_type']);
-            $curl_option[CURLOPT_PROXY]     = $option['proxy'];
-            $curl_option[CURLOPT_PROXYPORT] = $option['proxy_port'];
+            $curl_option[CURLOPT_PROXY]     = $option['proxy_pass'];
+            if (!empty($option['proxy_port'])) {
+                $curl_option[CURLOPT_PROXYPORT] = $option['proxy_port'];
+            }
         }
         $res = curl_init();
         curl_setopt_array($res , $curl_option);

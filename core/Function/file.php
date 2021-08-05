@@ -96,13 +96,17 @@ function get_filename($path = ''){
 // 获取扩展名（URL || Local Path 都可）
 function get_extension(string $path): string
 {
+
     $path   = format_path($path);
     $s_idx  = mb_strrpos($path , '.');
     if ($s_idx === false) {
         return '';
     }
-    $s_idx += 1;
-    return mb_substr($path , $s_idx);
+//    $s_idx += 1;
+    $extension = mb_substr($path , $s_idx);
+    preg_match('/^\.(\w+).*/' , $extension , $matches);
+    $extension = $matches[1] ?? '';
+    return $extension;
 }
 
 /*
