@@ -82,10 +82,10 @@ class FFprobe
     }
 
     // 单位：s
-    public function duration(): int
+    public function duration(): float
     {
         // 会出现 小数点的 情况，一律向下取
-        return floor($this->info['format']['duration']);
+        return (float) $this->info['format']['duration'];
     }
 
     // 单位: byte
