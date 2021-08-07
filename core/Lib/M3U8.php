@@ -29,9 +29,7 @@ class M3U8
     private $url;
 
     /**
-     * 用户设置的配置
-     *
-     * @var array ['is_enabled_proxy' => false , 'proxy_pass' => 'http://127.0.0.1:10009']
+     * 用户设置的配置，参考 defaultOption
      */
     private $option = [];
 
@@ -41,23 +39,52 @@ class M3U8
      * @var array
      */
     private $defaultOption = [
-        'is_enabled_proxy'  => false ,
         'proxy_pass'        => '' ,
-        'retry'             => 5 ,
+        'retry'             => 15 ,
+        'url'               => '' ,
     ];
 
-    public function __construct(string $url , string $file , array $option = [])
+    public function __construct(string $file , array $option = [])
     {
-        $this->content = file_exists($file) ? file_get_contents($file) : $file;
+        $option['proxy_pass']       = $option['proxy_pass'] ?? $this->defaultOption['proxy_pass'];
+        $option['retry']            = $option['retry'] ?? $this->defaultOption['retry'];
+        $option['url']              = $option['url'] ?? $this->defaultOption['url'];
+
+        $this->option = $option;
+        $this->url = empty($option['url']) ? '' : rtrim($option['url'] , '/\\') . '/';
+
+        if (file_exists($file)) {
+            $content = file_get_contents($file);
+        } else {
+            if ($this->isUrl($file)) {
+                $failed_count = 0;
+                while (true)
+                {
+                    $download_res = $this->curl($file);
+                    if ($download_res['code'] === 0) {
+                        break;
+                    }
+                    if ($failed_count >= $this->option['retry']) {
+                        throw new Exception($download_res['data']);
+                    }
+                    $failed_count++;
+                    usleep(800 * 1000);
+                }
+
+                $content = $download_res['data'];
+            } else {
+                $content = $file;
+            }
+        }
+        $this->content = $content;
         if (!$this->isM3u8()) {
             throw new Exception('提供文件或内容非M3U8格式');
         }
-        $this->url = rtrim($url , '/\\') . '/';
-        $option['is_enabled_proxy'] = $option['is_enabled_proxy'] ?? $this->defaultOption['is_enabled_proxy'];
-        $option['proxy_pass']       = $option['proxy_pass'] ?? $this->defaultOption['proxy_pass'];
-        $option['retry']       = $option['retry'] ?? $this->defaultOption['retry'];
+    }
 
-        $this->option = $option;
+    public function isUrl(string $str): bool
+    {
+        return preg_match("/https?:\/\//" , $str) > 0;
     }
 
     public function isM3u8(): bool
@@ -88,6 +115,10 @@ class M3U8
      */
     public function getDefinitions(): array
     {
+        $type = $this->getType();
+        if ($type !== 'source') {
+            return [];
+        }
         preg_match_all('/#EXT-X-STREAM-INF:(.*?)RESOLUTION=(\w+x\w+).*(\n|\r|\n\r|\r\n)(.*?)\3/m' , $this->content , $matches);
         $definitions = $matches[2];
         $definition_srcs = $matches[4];
@@ -169,6 +200,7 @@ class M3U8
                         return '';
                     }
                     echo "失败 ... 正在进行第{$failed_count}次重试 ...\n";
+                    usleep(800 * 1000);
                 }
                 $content = $curl_res['data'];
                 file_put_contents($temp_file , $content);
@@ -226,19 +258,22 @@ class M3U8
                     return '';
                 }
                 echo "失败 ... 正在进行第{$failed_count}次重试 ...\n";
+                usleep(800 * 1000);
             }
             $content = $curl_res['data'];
             // 临时暂存一下
 //            $filename = $this->filename('index') . '.m3u8';
 //            file_put_contents($save_dir . '/' . $filename , $content);
-            $download_res = $download(new self($this->url , $content , $this->option));
+            $download_res = $download(new self($content , $this->option));
         } else {
             $download_res = $download($this);
         }
         $end_time = time();
         $end_datetime = date('Y-m-d H:i:s' , $end_time);
         $execute_time = format_time($end_time - $start_time);
-        echo "【{$end_datetime}】视频处理结束；切片数量：{$sequence_count}；耗费时间：{$execute_time}\n";
+        echo "【{$end_datetime}】视频处理结束！\n";
+        echo "文件保存在：【{$download_res}】\n";
+        echo "切片数量：{$sequence_count}；耗费时间：{$execute_time}\n";
         return $download_res;
     }
 
@@ -253,7 +288,7 @@ class M3U8
             return compact('code' , 'message' , 'data');
         };
         $res = Http::get($url , [
-            'proxy_tunnel'  => $this->option['is_enabled_proxy'] ,
+            'proxy_tunnel'  => empty($this->option['proxy_pass']) ? false : true ,
             'proxy_pass'    => $this->option['proxy_pass'] ,
         ]);
         if (preg_match('/<html>/' , $res) > 0) {
