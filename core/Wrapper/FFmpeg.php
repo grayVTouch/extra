@@ -346,7 +346,7 @@ class FFmpeg
         {
             $concat .= $v . '|';
         }
-        $concat = rtrim($concat);
+        $concat = rtrim($concat , '|');
         $this->input($concat);
         return $this;
     }

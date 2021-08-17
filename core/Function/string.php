@@ -31,3 +31,18 @@ function mb_substring($str = '' , $s_idx = 0 , $e_idx = 0){
 
     return $result;
 }
+
+/**
+ * 去除文件 bom
+ *
+ * @param string $content
+ * @return false|string
+ */
+function remove_bom_header(string $content)
+{
+    if (file_exists($content)) {
+        $content = file_get_contents($content);
+    }
+    $content = trim($content , "\xEF\xBB\xBF");
+    return $content;
+}

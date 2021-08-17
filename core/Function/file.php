@@ -106,6 +106,7 @@ function get_extension(string $path): string
     $extension = mb_substr($path , $s_idx);
     preg_match('/^\.(\w+).*/' , $extension , $matches);
     $extension = $matches[1] ?? '';
+    $extension = strtolower($extension);
     return $extension;
 }
 
@@ -204,6 +205,8 @@ function detect_encoding(string $file): string
         // 注意顺序不能改
         'UTF-8',
         'GBK' ,
+        'UTF-16LE',
+        'UTF-16BE',
         'ISO-8859-1'
     ];
     $str = file_exists($file) ? file_get_contents($file) : $file;

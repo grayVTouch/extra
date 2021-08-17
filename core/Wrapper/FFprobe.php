@@ -82,10 +82,10 @@ class FFprobe
     }
 
     // 单位：s
-    public function duration(): int
+    public function duration(): float
     {
         // 会出现 小数点的 情况，一律向下取
-        return floor($this->info['format']['duration']);
+        return (float) $this->info['format']['duration'];
     }
 
     // 单位: byte
@@ -99,6 +99,12 @@ class FFprobe
     {
         $video_stream = $this->getVideoStream($this->info['streams']);
         return $video_stream['display_aspect_ratio'] ?? '';
+    }
+
+    // 单位: 位宽
+    public function bitRate(): int
+    {
+        return $this->info['format']['bit_rate'];
     }
 
     // 视频的核心信息
